@@ -3,8 +3,8 @@ import xml.etree.ElementTree as ET
 import os
 
 # HIER IHRE REALEN URLS EINTRAGEN
-URL_LAND1 = https://epg.lat/files/de.xml.gz
-URL_LAND2 = https://epg.lat/files/ch.xml.gz
+URL_LAND1 = "https://epg.lat/files/de.xml.gz"
+URL_LAND2 = "https://epg.lat/files/ch.xml.gz"
 OUTPUT_FILE = "epg.xml"
 
 def main():
