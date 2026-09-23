@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE tv SYSTEM "xmltv.dtd">
-<tv generator-info-name="none" generator-info-url="none">
+<tv generator-info-name="epg.lat" generator-info-url="https://epg.lat">
   <channel id="Sky.Sport.Bundesliga.de">
     <display-name lang="de">Sky Sport Bundesliga</display-name>
     <url>http://www.tvtoday.de</url>

@@ -1,5 +1,4 @@
 === VERFÜGBARE SENDER-IDS FÜR DEINE FILTER-LISTE ===
-Kopiere den vorderen Teil (vor der Klammer) in deine ERLAUBTE_SENDER-Liste.
 
 1+1.Ukraine.ch (1+1 Ukraine)
 123.tv.de (123.tv)
