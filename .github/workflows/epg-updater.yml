@@ -15,10 +15,10 @@ jobs:
 
     steps:
     - name: Code auschecken
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.4.0 # Aktualisiert für volle Node 24 Kompatibilität
 
     - name: Python einrichten
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v5.6.0 # Aktualisiert für volle Node 24 Kompatibilität
       with:
         python-version: '3.x'
 
