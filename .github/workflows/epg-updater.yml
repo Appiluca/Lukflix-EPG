@@ -2,9 +2,8 @@ name: Automatisch EPG aktualisieren
 
 on:
   schedule:
-    # Läuft jeden Tag um 04:00 Uhr nachts (UTC Zeit)
     - cron: '0 4 * * *'
-  workflow_dispatch: # Ermöglicht es, das Skript jederzeit manuell zu starten
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,10 +14,10 @@ jobs:
 
     steps:
     - name: Code auschecken
-      uses: actions/checkout@v4.4.0 # Aktualisiert für volle Node 24 Kompatibilität
+      uses: actions/checkout@v5
 
     - name: Python einrichten
-      uses: actions/setup-python@v5.6.0 # Aktualisiert für volle Node 24 Kompatibilität
+      uses: actions/setup-python@v6
       with:
         python-version: '3.x'
 
