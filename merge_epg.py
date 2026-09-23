@@ -4,9 +4,9 @@ import gzip
 import io
 import sys
 
-URL_LAND1 = "https://epg.lat"
-URL_LAND2 = "https://epg.lat"
-OUTPUT_FILE = "epg.xml.gz"  # Geändert auf .gz
+URL_LAND1 = "https://epg.lat/files/de.xml.gz"
+URL_LAND2 = "https://epg.lat/files/ch.xml.gz"
+OUTPUT_FILE = "epg.xml"
 
 def main():
     print("Starte EPG Download...")
@@ -53,6 +53,7 @@ def main():
                 new_programmes.append(child)
 
         # Index bestimmen, wo die Programme in der ersten Datei beginnen
+        # Neue Channels müssen VOR den ersten Programmen eingefügt werden
         insert_index = 0
         for i, child in enumerate(root1):
             if child.tag == 'programme':
@@ -71,12 +72,9 @@ def main():
 
         print("Dateien erfolgreich und strukturiert zusammengeführt.")
         
-        # Speichern als komprimiertes GZIP-XML
-        print(f"Komprimiere und speichere Datei unter '{OUTPUT_FILE}'...")
-        with gzip.open(OUTPUT_FILE, 'wb') as f:
-            tree1.write(f, encoding='utf-8', xml_declaration=True)
-            
-        print(f"Datei '{OUTPUT_FILE}' erfolgreich generiert und komprimiert.")
+        # Speichern
+        tree1.write(OUTPUT_FILE, encoding='utf-8', xml_declaration=True)
+        print(f"Datei '{OUTPUT_FILE}' erfolgreich generiert.")
         
     except Exception as e:
         print(f"Fehler während des Prozesses: {e}")
