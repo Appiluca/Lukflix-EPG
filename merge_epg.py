@@ -1,6 +1,7 @@
 import urllib.request
 import xml.etree.ElementTree as ET
 import gzip
+import io
 import sys
 
 # Konfiguration
@@ -9,25 +10,50 @@ URL_LAND2 = "https://epg.lat"
 OUTPUT_FILE = "epg.xml"
 
 def download_and_parse(url, headers):
-    """Lädt die GZ-Datei direkt als Stream und parst das XML speicherschonend."""
+    """Lädt die Datei und prüft flexibel, ob sie komprimiert ist oder als HTML/Text ankommt."""
     req = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(req) as response:
-        # GzipFile liest direkt aus dem Netzwerk-Response-Stream (kein io.BytesIO im RAM)
-        with gzip.GzipFile(fileobj=response) as gz:
-            tree = ET.parse(gz)
-            return tree.getroot()
+        content = response.read()
+        
+        # Prüfen, ob die Datei mit dem magischen Gzip-Byte beginnt (0x1f 0x8b)
+        if content.startswith(b'\x1f\x8b'):
+            print(f" -> Download erfolgreich (.gz Format erkannt). Entpacke...")
+            with gzip.GzipFile(fileobj=io.BytesIO(content)) as gz:
+                tree = ET.parse(gz)
+                return tree.getroot()
+        else:
+            # Wenn es kein Gzip ist, ist es vermutlich reiner XML-Text oder eine Fehlermeldung (HTML)
+            print(f" -> Server hat keine GZ-Datei gesendet. Versuche Direkt-Parsing...")
+            text_content = content.decode('utf-8', errors='ignore')
+            
+            # Falls Cloudflare oder ein Fehler-HTML zurückgegeben wurde
+            if "html" in text_content.lower() or "<!DOCTYPE" in text_content:
+                print(f" HINWEIS: Der Server hat eine Webseite/Blockierung statt EPG-Daten gesendet.")
+                if "cloudflare" in text_content.lower():
+                    raise ValueError("Download von Cloudflare blockiert (Schutz aktiv).")
+                raise ValueError("Antwort des Servers war kein XML, sondern HTML.")
+                
+            return ET.fromstring(content)
 
 def main():
-    print("Starte speicherschonenden EPG Download...")
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    print("Starte EPG Download mit Fehleranalyse...")
+    
+    # Ein realistischerer Browser-Header, um Server-Blockaden zu umgehen
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'de,en-US;q=0.7,en;q=0.3'
+    }
     
     try:
-        # 1. Beide EPG-Dateien via Stream in den Speicher laden
+        # 1. Beide EPG-Dateien laden
+        print(f"Lade DE-EPG...")
         root1 = download_and_parse(URL_LAND1, headers)
-        print("EPG 1 (DE) erfolgreich via Stream geladen.")
+        print("EPG 1 (DE) erfolgreich verarbeitet.")
         
+        print(f"Lade CH-EPG...")
         root2 = download_and_parse(URL_LAND2, headers)
-        print("EPG 2 (CH) erfolgreich via Stream geladen.")
+        print("EPG 2 (CH) erfolgreich verarbeitet.")
         
         print("Führe alle EPG-Daten strukturiert zusammen...")
         
@@ -53,7 +79,6 @@ def main():
                 new_programmes.append(child)
 
         # Index bestimmen, wo die Programme in der ersten Datei beginnen
-        # Neue Channels müssen VOR den ersten Programmen eingefügt werden
         insert_index = 0
         for i, child in enumerate(root1):
             if child.tag == 'programme':
@@ -70,7 +95,7 @@ def main():
         for programme in new_programmes:
             root1.append(programme)
 
-        print("Dateien erfolgreich zusammengeführt (Alle Sender enthalten).")
+        print("Dateien erfolgreich zusammengeführt.")
         
         # Speichern der finalen XML-Datei
         tree1 = ET.ElementTree(root1)
