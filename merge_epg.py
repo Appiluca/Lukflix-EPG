@@ -1,35 +1,35 @@
 import urllib.request
 import xml.etree.ElementTree as ET
 import gzip
-import io
 import sys
 
-URL_LAND1 = "https://epg.lat/files/de.xml.gz"
-URL_LAND2 = "https://epg.lat/files/ch.xml.gz"
+# Konfiguration
+URL_LAND1 = "https://epg.lat"
+URL_LAND2 = "https://epg.lat"
 OUTPUT_FILE = "epg.xml"
 
+def download_and_parse(url, headers):
+    """Lädt die GZ-Datei direkt als Stream und parst das XML speicherschonend."""
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req) as response:
+        # GzipFile liest direkt aus dem Netzwerk-Response-Stream (kein io.BytesIO im RAM)
+        with gzip.GzipFile(fileobj=response) as gz:
+            tree = ET.parse(gz)
+            return tree.getroot()
+
 def main():
-    print("Starte EPG Download...")
+    print("Starte speicherschonenden EPG Download...")
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
     
     try:
-        # Erste Datei (DE) laden
-        req1 = urllib.request.Request(URL_LAND1, headers=headers)
-        with urllib.request.urlopen(req1) as response:
-            with gzip.GzipFile(fileobj=io.BytesIO(response.read())) as gz:
-                tree1 = ET.parse(gz)
-                root1 = tree1.getroot()
-        print("EPG 1 (DE) erfolgreich geladen.")
+        # 1. Beide EPG-Dateien via Stream in den Speicher laden
+        root1 = download_and_parse(URL_LAND1, headers)
+        print("EPG 1 (DE) erfolgreich via Stream geladen.")
         
-        # Zweite Datei (CH) laden
-        req2 = urllib.request.Request(URL_LAND2, headers=headers)
-        with urllib.request.urlopen(req2) as response:
-            with gzip.GzipFile(fileobj=io.BytesIO(response.read())) as gz:
-                tree2 = ET.parse(gz)
-                root2 = tree2.getroot()
-        print("EPG 2 (CH) erfolgreich geladen.")
+        root2 = download_and_parse(URL_LAND2, headers)
+        print("EPG 2 (CH) erfolgreich via Stream geladen.")
         
-        print("Führe EPG-Daten sauber zusammen...")
+        print("Führe alle EPG-Daten strukturiert zusammen...")
         
         # Bestehende Channel-IDs aus der ersten Datei erfassen, um Duplikate zu vermeiden
         existing_channels = set()
@@ -38,11 +38,11 @@ def main():
             if channel_id:
                 existing_channels.add(channel_id)
 
-        # Listen für die neuen Elemente aus der zweiten Datei
+        # Listen für alle neuen Elemente aus der zweiten Datei
         new_channels = []
         new_programmes = []
 
-        # Elemente der zweiten Datei sortieren
+        # Elemente der zweiten Datei aufteilen
         for child in root2:
             if child.tag == 'channel':
                 channel_id = child.get('id')
@@ -66,13 +66,14 @@ def main():
         for channel in reversed(new_channels):
             root1.insert(insert_index, channel)
 
-        # Neue Programme einfach ganz ans Ende anhängen
+        # Neue Programme an das Ende anhängen
         for programme in new_programmes:
             root1.append(programme)
 
-        print("Dateien erfolgreich und strukturiert zusammengeführt.")
+        print("Dateien erfolgreich zusammengeführt (Alle Sender enthalten).")
         
-        # Speichern
+        # Speichern der finalen XML-Datei
+        tree1 = ET.ElementTree(root1)
         tree1.write(OUTPUT_FILE, encoding='utf-8', xml_declaration=True)
         print(f"Datei '{OUTPUT_FILE}' erfolgreich generiert.")
         
