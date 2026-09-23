@@ -2,13 +2,13 @@ import urllib.request
 import xml.etree.ElementTree as ET
 import gzip
 import io
-import re
 
 URL_LAND1 = "https://epg.lat/files/de.xml.gz"
 URL_LAND2 = "https://epg.lat/files/ch.xml.gz"
 OUTPUT_FILE = "epg.xml"
 LISTE_ALLE_SENDER = "verfuegbare_sender.txt"
 
+# SENDER-FILTER
 ERLAUBTE_SENDER = [
     "Sky.Sport.Top.Event.de", 
     "DAZN.1.de", 
@@ -23,17 +23,19 @@ ERLAUBTE_SENDER = [
 ]
 
 def bereinige_element(elem):
-    """Entfernt jegliche Python/XML-Namespaces (z.B. {http://...}), damit IPTVX die Tags versteht."""
+    """Entfernt jegliche Namespaces, damit IPTVX die Tags fehlerfrei parsen kann."""
     if elem.tag.startswith("{"):
         elem.tag = elem.tag.split("}", 1)[1]
     for child in elem:
         bereinige_element(child)
 
 def extrahiere_und_speichere_senderliste(root1, root2):
-    """Sammelt alle im XML vorhandenen Sender-IDs."""
+    """Sammelt alle im XML vorhandenen Sender-IDs für den User."""
     gefundene_sender = set()
     for root in [root1, root2]:
-        for child in root.findall(".//channel") if root.tag.startswith("{") else root.findall("channel"):
+        # Flexibler Find-Befehl, falls Namespaces noch da sind
+        channels = root.findall(".//channel") if root.tag.startswith("{") else root.findall("channel")
+        for child in channels:
             channel_id = child.get("id")
             if channel_id:
                 display_name = child.find(".//display-name") if root.tag.startswith("{") else child.find("display-name")
@@ -46,8 +48,7 @@ def extrahiere_und_speichere_senderliste(root1, root2):
             f.write(f"{sender}\n")
 
 def baue_gefiltertes_xmltv(root1, root2):
-    """Baut das XML absolut identisch zur epg.lat Struktur auf."""
-    # Exakte Attribute des Originals spiegeln
+    """Baut das XML exakt nach der Struktur von epg.lat auf."""
     new_root = ET.Element("tv")
     new_root.set("generator-info-name", "epg.lat")
     new_root.set("generator-info-url", "https://epg.lat")
@@ -55,11 +56,8 @@ def baue_gefiltertes_xmltv(root1, root2):
     kanäle = []
     sendungen = []
     
-    # Elemente sammeln (unter Berücksichtigung potenzieller Wildcards beim Suchen)
     for root in [root1, root2]:
-        # Bereinige Namespaces vor der Extraktion
         bereinige_element(root)
-        
         for child in root:
             if child.tag == "channel":
                 cid = child.get("id")
@@ -70,7 +68,7 @@ def baue_gefiltertes_xmltv(root1, root2):
                 if not ERLAUBTE_SENDER or cid in ERLAUBTE_SENDER:
                     sendungen.append(child)
                     
-    # Strikte Reihenfolge einhalten
+    # Strikte Reihenfolge: Kanäle vor Sendungen
     for k in kanäle:
         new_root.append(k)
     for s in sendungen:
@@ -95,27 +93,26 @@ def main():
         
         extrahiere_und_speichere_senderliste(root1, root2)
         
-        print("Wende Sender-Filter an und bereinige Struktur...")
+        print("Wende Sender-Filter an...")
         gemixtes_root = baue_gefiltertes_xmltv(root1, root2)
         
-        # Zeilenumbrüche erzwingen
+        # Generiert die sauberen Einrückungen direkt im Element-Baum
         ET.indent(gemixtes_root, space="  ", level=0)
         
-        # XML konvertieren und aufräumen
-        xml_str = ET.tostring(gemixtes_root, encoding='utf-8').decode('utf-8')
+        # Erstelle den XML-Baum
+        tree = ET.ElementTree(gemixtes_root)
         
-        # Jedes verbliebene Namespace-Überbleibsel via Regex vernichten
-        xml_str = re.sub(r'\sns\d+:\w+="[^"]+"', '', xml_str)
-        xml_str = re.sub(r'</?ns\d+:', '<', xml_str)
-        xml_str = re.sub(r'</ns\d+:', '</', xml_str)
-        
-        # Finaler, exakter Header-Zusammenbau
-        volles_xml = f'<?xml version="1.0" encoding="utf-8" ?>\n<!DOCTYPE tv SYSTEM "xmltv.dtd">\n{xml_str}'
-        
-        with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-            f.write(volles_xml)
+        # WICHTIG FÜR APPLE/IPTVX: Datei als Binärdaten (Bytes) schreiben!
+        # Python kümmert sich hierbei nativ um korrekte XML-Entities und Encodings.
+        with open(OUTPUT_FILE, "wb") as f:
+            # 1. XML Deklaration schreiben
+            f.write(b'<?xml version="1.0" encoding="utf-8" ?>\n')
+            # 2. DOCTYPE schreiben
+            f.write(b'<!DOCTYPE tv SYSTEM "xmltv.dtd">\n')
+            # 3. Den ElementTree direkt als UTF-8 codierte Bytes anhängen
+            tree.write(f, encoding="utf-8", xml_declaration=False)
             
-        print(f"Datei '{OUTPUT_FILE}' wurde exakt im Original-Format rekonstruiert.")
+        print(f"Datei '{OUTPUT_FILE}' wurde fehlerfrei im Binär-Format generiert.")
         
     except Exception as e:
         print(f"Fehler: {e}")
