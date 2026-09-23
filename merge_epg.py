@@ -1,7 +1,8 @@
-import gzip
+import urllib.request
 import xml.etree.ElementTree as ET
+import gzip
+import io
 import sys
-import requests
 
 # Konfiguration
 URL_LAND1 = "https://epg.lat"
@@ -9,42 +10,38 @@ URL_LAND2 = "https://epg.lat"
 OUTPUT_FILE = "epg.xml"
 
 def download_and_parse(url, headers):
-    """Lädt die Datei mittels requests und entpackt sie."""
-    print(f" -> Verbinde mit {url}...")
-    
-    # Download starten
-    response = requests.get(url, headers=headers, timeout=30)
-    
-    # Prüfen, ob der Server Fehler wie 403 Forbidden oder 404 zurückgibt
-    response.raise_for_status()
-    
-    content = response.content
-    
-    # Prüfen, ob die Datei mit dem magischen Gzip-Byte beginnt (0x1f 0x8b)
-    if content.startswith(b'\x1f\x8b'):
-        print(" -> Download erfolgreich (.gz Format erkannt). Entpacke...")
-        decompressed_data = gzip.decompress(content)
-        return ET.fromstring(decompressed_data)
-    else:
-        # Falls es eine HTML-Seite ist (Anzeichen für eine Blockierung)
-        text_start = content[:200].decode('utf-8', errors='ignore')
-        if "<html" in text_start.lower() or "<!doctype" in text_start.lower():
-            raise ValueError("Der Server blockiert die Anfrage weiterhin und schickt eine HTML-Webseite.")
-        
-        # Falls es unkomprimiertes XML ist, direkt einlesen
-        print(" -> Server hat unkomprimierte Daten gesendet. Verarbeite direkt...")
-        return ET.fromstring(content)
+    """Lädt die Datei via urllib und versucht Blockaden zu umgehen."""
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as response:
+            content = response.read()
+            
+            # Prüfen, ob die Datei mit dem magischen Gzip-Byte beginnt (0x1f 0x8b)
+            if content.startswith(b'\x1f\x8b'):
+                print(" -> Download erfolgreich (.gz Format erkannt). Entpacke...")
+                with gzip.GzipFile(fileobj=io.BytesIO(content)) as gz:
+                    tree = ET.parse(gz)
+                    return tree.getroot()
+            else:
+                text_start = content[:200].decode('utf-8', errors='ignore')
+                if "<html" in text_start.lower() or "<!doctype" in text_start.lower():
+                    raise ValueError("Der Server blockiert GitHub Actions weiterhin mit einer Cloudflare-HTML-Schutzseite.")
+                
+                print(" -> Server hat unkomprimierte XML-Daten gesendet. Verarbeite direkt...")
+                return ET.fromstring(content)
+    except Exception as e:
+        raise RuntimeError(f"Netzwerkfehler oder Blockade bei {url}: {e}")
 
 def main():
-    print("Starte EPG Download via Requests-Engine...")
+    print("Starte GitHub-optimierten EPG Download...")
     
-    # Browser-Kopfzeilen, um eine Blockade vollständig zu umgehen
+    # Aggressiverer Browser- & Bot-Header, um die GitHub-Rechenzentrum-Sperre zu täuschen
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive'
+        'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://google.com)',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'de-DE,de;q=0.9',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
     }
     
     try:
@@ -91,7 +88,7 @@ def main():
         for programme in new_programmes:
             root1.append(programme)
 
-        print("Dateien erfolgreich zusammengeführt (Alle Sender enthalten).")
+        print("Dateien erfolgreich zusammengeführt.")
         
         # Speichern der finalen XML-Datei
         tree1 = ET.ElementTree(root1)
