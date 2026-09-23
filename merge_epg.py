@@ -4,12 +4,13 @@ import gzip
 import io
 
 # HIER IHRE REALEN URLS EINTRAGEN
-URL_LAND1 = "https://epg.lat/files/de.xml.gz"
-URL_LAND2 = "https://epg.lat/files/ch.xml.gz"
+URL_LAND1 = "https://epg.lat"
+URL_LAND2 = "https://epg.lat"
 OUTPUT_FILE = "epg.xml"
+LISTE_ALLE_SENDER = "verfuegbare_sender.txt"
 
 # SENDER-FILTER: Trage hier die Sender-IDs ein, die du behalten willst.
-# Falls die Liste leer ist [], wird GAR NICHTS gefiltert (alle Sender bleiben).
+# Wenn du die Liste komplett leer lässt [], wird nichts gefiltert (alle Sender bleiben).
 ERLAUBTE_SENDER = [
     "Sky.Sport.Top.Event.de", 
     "DAZN.1.de", 
@@ -23,12 +24,32 @@ ERLAUBTE_SENDER = [
     "blue.Sport.D.2.ch"
 ]
 
+def extrahiere_und_speichere_senderliste(root):
+    """Sammelt alle im XML vorhandenen Sender-IDs und speichert sie sortiert in eine TXT-Datei."""
+    gefundene_sender = set()
+    for child in root:
+        if child.tag == "channel":
+            channel_id = child.get("id")
+            if channel_id:
+                # Versuche auch den lesbaren Anzeigenamen zu finden
+                display_name = child.find("display-name")
+                name_str = display_name.text if display_name is not None and display_name.text else "Unbekannt"
+                gefundene_sender.add(f"{channel_id} ({name_str})")
+    
+    # Sortiert in TXT-Datei schreiben
+    with open(LISTE_ALLE_SENDER, "w", encoding="utf-8") as f:
+        f.write("=== VERFÜGBARE SENDER-IDS FÜR DEINE FILTER-LISTE ===\n")
+        f.write("Kopiere den vorderen Teil (vor der Klammer) in deine ERLAUBTE_SENDER-Liste.\n\n")
+        for sender in sorted(gefundene_sender):
+            f.write(f"{sender}\n")
+    print(f"Liste aller verfügbaren Sender wurde in '{LISTE_ALLE_SENDER}' gespeichert.")
+
 def filter_epg_elements(root):
     """Entfernt alle Sender und Sendungen, die nicht in der Whitelist sind."""
     if not ERLAUBTE_SENDER:
-        return  # Wenn die Liste leer ist, filtern wir nichts
+        print("Filter-Liste ist leer. Es werden alle Sender beibehalten.")
+        return
     
-    # Wir erstellen eine Kopie der Liste aller Elemente, über die wir iterieren
     for child in list(root):
         tag = child.tag
         
@@ -70,6 +91,9 @@ def main():
         for child in root2:
             root1.append(child)
             
+        # Senderliste generieren (VOR dem Filtern, damit du immer alle Optionen siehst!)
+        extrahiere_und_speichere_senderliste(root1)
+        
         # Filtern anwenden
         print("Wende Sender-Filter an...")
         filter_epg_elements(root1)
@@ -81,6 +105,10 @@ def main():
     except Exception as e:
         print(f"Fehler während des Prozesses: {e}")
         exit(1)
+
+if __name__ == "__main__":
+    main()
+
 
 if __name__ == "__main__":
     main()
