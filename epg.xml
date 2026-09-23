@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE tv SYSTEM "xmltv.dtd">
-<tv generator-info-name="none" generator-info-url="none"><channel id="Sky.Sport.Bundesliga.de">
+<tv generator-info-name="none" generator-info-url="none">
+  <channel id="Sky.Sport.Bundesliga.de">
     <display-name lang="de">Sky Sport Bundesliga</display-name>
     <url>http://www.tvtoday.de</url>
   </channel>
@@ -7131,14 +7132,16 @@ Es gibt all das, was den Fußball so emotional macht. Hinzu kommen wichtige Hint
     <desc lang="de,it">Brack Super League, 9. Spieltag - Deutsch/Italienisch.</desc>
     <date>2026</date>
     <icon src="https://services.sg101.prd.sctv.ch/content/imagestv/program/40198102_stage_W660.webp" />
-    <premiere /></programme>
+    <premiere />
+  </programme>
   <programme channel="blue.Sport.D.1.ch" start="20260919183000 +0000" stop="20260919185500 +0000">
     <title lang="de">Alle Spiele, alle Tore - Brack Super League</title>
     <desc lang="de">Brack Super League, 9. Spieltag - Deutsch.</desc>
     <date>2026</date>
     <icon src="https://services.sg101.prd.sctv.ch/content/imagestv/program/40198231_stage_W660.webp" />
     <country lang="de">DE</country>
-    <premiere /></programme>
+    <premiere />
+  </programme>
   <programme channel="blue.Sport.D.1.ch" start="20260919185500 +0000" stop="20260919192500 +0000">
     <title lang="de">GO! Das Schweizer Mobilitätsmagazin</title>
     <desc lang="de">Episode 9 - Aussenseiter: Wieso der Ford Puma trotz seines Alters das richtige E-Auto sein kann. Dauerläufer: 1000 Kilometer im neuen Volvo EX60. Individualist: Warum Toyota eine eigene Antriebsstrategie verfolgt.</desc>
@@ -7239,20 +7242,23 @@ Es gibt all das, was den Fußball so emotional macht. Hinzu kommen wichtige Hint
     <desc lang="de,it">Brack Super League, 9. Spieltag - Deutsch/Italienisch.</desc>
     <date>2026</date>
     <icon src="https://services.sg101.prd.sctv.ch/content/imagestv/program/40198265_stage_W660.webp" />
-    <premiere /></programme>
+    <premiere />
+  </programme>
   <programme channel="blue.Sport.D.1.ch" start="20260920141000 +0000" stop="20260920165000 +0000">
     <title lang="de,it">FC Basel 1893 - FC St.Gallen 1879</title>
     <desc lang="de,it">Brack Super League, 9. Spieltag - Deutsch/Italienisch\r\nAlle Spiele, alle Tore folgt im Anschluss.</desc>
     <date>2026</date>
     <icon src="https://services.sg101.prd.sctv.ch/content/imagestv/program/40198359_stage_W660.webp" />
-    <premiere /></programme>
+    <premiere />
+  </programme>
   <programme channel="blue.Sport.D.1.ch" start="20260920165000 +0000" stop="20260920171500 +0000">
     <title lang="de">Alle Spiele, alle Tore - Brack Super League</title>
     <desc lang="de">Brack Super League, 9. Spieltag - Deutsch.</desc>
     <date>2026</date>
     <icon src="https://services.sg101.prd.sctv.ch/content/imagestv/program/40198400_stage_W660.webp" />
     <country lang="de">DE</country>
-    <premiere /></programme>
+    <premiere />
+  </programme>
   <programme channel="blue.Sport.D.1.ch" start="20260920171500 +0000" stop="20260920174500 +0000">
     <title lang="de">GO! Das Schweizer Mobilitätsmagazin</title>
     <desc lang="de">Episode 9 - Aussenseiter: Wieso der Ford Puma trotz seines Alters das richtige E-Auto sein kann. Dauerläufer: 1000 Kilometer im neuen Volvo EX60. Individualist: Warum Toyota eine eigene Antriebsstrategie verfolgt.</desc>
@@ -8063,4 +8069,4 @@ Es gibt all das, was den Fußball so emotional macht. Hinzu kommen wichtige Hint
     <date>2026</date>
     <icon src="https://services.sg101.prd.sctv.ch/content/imagestv/program/40189299_stage_W660.webp" />
   </programme>
-  </tv>
+</tv>
