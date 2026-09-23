@@ -1,6 +1,6 @@
-<?xml version='1.0' encoding='utf-8'?>
-<tv generator-info-name="none" generator-info-url="none">
-  <channel id="Sky.Sport.Bundesliga.de">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE tv SYSTEM "xmltv.dtd">
+<tv generator-info-name="none" generator-info-url="none"><channel id="Sky.Sport.Bundesliga.de">
     <display-name lang="de">Sky Sport Bundesliga</display-name>
     <url>http://www.tvtoday.de</url>
   </channel>
@@ -35,6 +35,18 @@
     <icon src="https://sender.epglogos.de/svg/12189.svg" />
     <icon src="https://sender.epglogos.de/svg/12189.svg" />
     <url>http://www.tvdigital.de</url>
+  </channel>
+  <channel id="blue.Sport.D.2.ch">
+    <icon src="https://services.sg101.prd.sctv.ch/content/images/tv/channel/64efa4d4-970e-460d-9136-8ba6af04f1f5_W90.png" />
+    <icon src="https://services.sg101.prd.sctv.ch/content/images/tv/channel/64efa4d4-970e-460d-9136-8ba6af04f1f5_W90.png" />
+    <url>http://www.tv.blue.ch</url>
+    <display-name lang="de">blue Sport D 2</display-name>
+  </channel>
+  <channel id="blue.Sport.D.1.ch">
+    <icon src="https://services.sg101.prd.sctv.ch/content/images/tv/channel/87327ea5-eb60-4e86-8a6b-8583e177592d_W90.png" />
+    <icon src="https://services.sg101.prd.sctv.ch/content/images/tv/channel/87327ea5-eb60-4e86-8a6b-8583e177592d_W90.png" />
+    <url>http://www.tv.blue.ch</url>
+    <display-name lang="de">blue Sport D 1</display-name>
   </channel>
   <programme start="20260919023000 +0000" stop="20260919043000 +0000" channel="Sky.Sport.Bundesliga.de">
     <title lang="de">Fußball: 2. Bundesliga</title>
@@ -7020,18 +7032,6 @@ Es gibt all das, was den Fußball so emotional macht. Hinzu kommen wichtige Hint
       <value>0/3</value>
     </star-rating>
   </programme>
-  <channel id="blue.Sport.D.2.ch">
-    <icon src="https://services.sg101.prd.sctv.ch/content/images/tv/channel/64efa4d4-970e-460d-9136-8ba6af04f1f5_W90.png" />
-    <icon src="https://services.sg101.prd.sctv.ch/content/images/tv/channel/64efa4d4-970e-460d-9136-8ba6af04f1f5_W90.png" />
-    <url>http://www.tv.blue.ch</url>
-    <display-name lang="de">blue Sport D 2</display-name>
-  </channel>
-  <channel id="blue.Sport.D.1.ch">
-    <icon src="https://services.sg101.prd.sctv.ch/content/images/tv/channel/87327ea5-eb60-4e86-8a6b-8583e177592d_W90.png" />
-    <icon src="https://services.sg101.prd.sctv.ch/content/images/tv/channel/87327ea5-eb60-4e86-8a6b-8583e177592d_W90.png" />
-    <url>http://www.tv.blue.ch</url>
-    <display-name lang="de">blue Sport D 1</display-name>
-  </channel>
   <programme channel="blue.Sport.D.1.ch" start="20260919033000 +0000" stop="20260919060500 +0000">
     <title lang="de,it">Fussball: FC Lugano - FC St.Gallen 1879</title>
     <desc lang="de,it">Brack Super League, 4. Spieltag - Deutsch/Italienisch.</desc>
