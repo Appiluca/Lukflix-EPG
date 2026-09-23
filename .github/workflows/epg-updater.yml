@@ -15,10 +15,10 @@ jobs:
 
     steps:
     - name: Code auschecken
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7 # Aktualisiert von v4 auf v7 (unterstützt Node.js 24)
 
     - name: Python einrichten
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7 # Aktualisiert von v5 auf v7 (unterstützt Node.js 24)
       with:
         python-version: '3.x'
 
