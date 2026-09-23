@@ -23,10 +23,10 @@ jobs:
 
     - name: EPG Skript ausfuehren
       run: python merge_epg.py
-
+      
     - name: Generierte EPG Datei im Repository speichern
       run: |
         git config --global user.name 'EPG Bot'
         git config --global user.email 'bot@github.com'
-        git add epg.xml
-        git diff --quiet && git diff --staged --quiet || (git commit -m "EPG automatisch aktualisiert" && git push)
+        git add epg.xml verfuegbare_sender.txt  
+        git diff --quiet && git diff --staged --quiet || (git commit -m "EPG und Senderliste automatisch aktualisiert" && git push)
