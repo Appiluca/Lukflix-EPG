@@ -19,7 +19,7 @@ ERLAUBTE_SENDER = [
     "Sky.Sport.Golf.de",
     "Sky.Sport.Mix.de",
     "Sky.Sport.Premier.League.de",
-    "blue.Sport.D.1.ch";
+    "blue.Sport.D.1.ch",
     "blue.Sport.D.2.ch"
 ]
 
