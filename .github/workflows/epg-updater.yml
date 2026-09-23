@@ -2,9 +2,9 @@ name: Automatisch EPG aktualisieren
 
 on:
   schedule:
-    # Läuft jeden Tag um 04:00 Uhr nachts (UTC Zeit)
+    # Läuft jeden Tag um 04:00 Uhr UTC (ca. 05:00 oder 06:00 Uhr Schweizer Zeit)
     - cron: '0 4 * * *'
-  workflow_dispatch: # Ermöglicht es, das Skript jederzeit manuell zu starten
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -20,14 +20,25 @@ jobs:
     - name: Python einrichten
       uses: actions/setup-python@v5
       with:
-        python-version: '3.x'
+        python-version: '3.11' # Feste Version verhindert unerwartete Fehler bei Major-Updates
 
     - name: EPG Skript ausfuehren
       run: python merge_epg.py
 
     - name: Generierte EPG Datei im Repository speichern
+      # 'if: success()' stellt sicher, dass der Push NUR passiert, wenn das Python-Skript fehlerfrei lief
+      if: success() 
       run: |
-        git config --global user.name 'EPG Bot'
-        git config --global user.email 'bot@github.com'
-        git add epg.xml
-        git diff --quiet && git diff --staged --quiet || (git commit -m "EPG automatisch aktualisiert" && git push)
+        # Verwende den offiziellen GitHub Actions Bot-User (Best Practice)
+        git config --local user.name 'github-actions[bot]'
+        git config --local user.email 'github-actions[bot]@users.noreply.github.com'
+        
+        # Prüfen, ob die Datei überhaupt existiert, bevor wir sie hinzufügen
+        if [ -f epg.xml ]; then
+          git add epg.xml
+          # Commit und Push nur, wenn es echte Änderungen im EPG-Inhalt gibt
+          git diff-index --quiet HEAD || (git commit -m "EPG automatisch aktualisiert" && git push)
+        else
+          echo "Fehler: epg.xml wurde vom Python-Skript nicht erstellt!"
+          exit 1
+        fi
