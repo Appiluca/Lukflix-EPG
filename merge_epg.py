@@ -44,7 +44,6 @@ def extrahiere_und_speichere_senderliste(root1, root2):
 
 def baue_gefiltertes_xmltv(root1, root2):
     """Erstellt ein neues, strukturell valides XMLTV-Dokument nach XMLTV-Standard."""
-    # Neues Root-Element erstellen und Attribute des Originals kopieren
     new_root = ET.Element("tv")
     for key, value in root1.items():
         new_root.set(key, value)
@@ -52,7 +51,6 @@ def baue_gefiltertes_xmltv(root1, root2):
     kanäle = []
     sendungen = []
     
-    # Elemente aus beiden Quelldateien filtern und sammeln
     for root in [root1, root2]:
         for child in root:
             if child.tag == "channel":
@@ -64,13 +62,13 @@ def baue_gefiltertes_xmltv(root1, root2):
                 if not ERLAUBTE_SENDER or cid in ERLAUBTE_SENDER:
                     sendungen.append(child)
                     
-    # STRIKTE REIHENFOLGE: Zuerst ALLE Kanäle, dann ALLE Sendungen anhängen
+    # Strikte XMLTV Reihenfolge
     for k in kanäle:
         new_root.append(k)
     for s in sendungen:
         new_root.append(s)
         
-    return ET.ElementTree(new_root)
+    return new_root
 
 def main():
     print("Starte EPG Download...")
@@ -91,24 +89,26 @@ def main():
                 root2 = ET.parse(gz).getroot()
         print("EPG 2 (CH) erfolgreich geladen.")
         
-        # Senderliste für den User aus beiden Quellen generieren (bevor gefiltert wird)
+        # Senderliste generieren
         extrahiere_und_speichere_senderliste(root1, root2)
         
-        # Sauberes, gefiltertes XML-Objekt bauen
-        print("Wende Sender-Filter an und sortiere EPG-Struktur...")
-        gemixtes_tree = baue_gefiltertes_xmltv(root1, root2)
+        print("Wende Sender-Filter an...")
+        gemixtes_root = baue_gefiltertes_xmltv(root1, root2)
         
-        # Konvertiere XML in String, um den zwingend erforderlichen DOCTYPE-Header einzufügen
-        xml_str = ET.tostring(gemixtes_tree.getroot(), encoding='utf-8').decode('utf-8')
+        # WICHTIG FÜR IPTVX: Erzwinge echte Zeilenumbrüche und Einrückungen im XML!
+        ET.indent(gemixtes_root, space="  ", level=0)
         
-        # Korrekten XML-Header zusammenbauen
+        # Konvertiere XML in String
+        xml_str = ET.tostring(gemixtes_root, encoding='utf-8').decode('utf-8')
+        
+        # Sauberen XML- & DOCTYPE-Header hinzufügen
         volles_xml = f'<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE tv SYSTEM "xmltv.dtd">\n{xml_str}'
         
         # Datei schreiben
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
             f.write(volles_xml)
             
-        print(f"Datei '{OUTPUT_FILE}' erfolgreich im XMLTV-Format generiert.")
+        print(f"Datei '{OUTPUT_FILE}' erfolgreich im lesbaren XMLTV-Format generiert.")
         
     except Exception as e:
         print(f"Fehler während des Prozesses: {e}")
