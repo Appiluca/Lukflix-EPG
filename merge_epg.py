@@ -4,8 +4,8 @@ import gzip
 import io
 
 # HIER IHRE REALEN URLS EINTRAGEN
-URL_LAND1 = "https://epg.lat/files/de.xml.gz"
-URL_LAND2 = "https://epg.lat/files/ch.xml.gz"
+URL_LAND1 = "https://www.free-epg.de/api/epg/de.xml.gz"
+URL_LAND2 = "https://www.free-epg.de/api/epg/ch.xml.gz"
 OUTPUT_FILE = "epg.xml"
 
 def main():
